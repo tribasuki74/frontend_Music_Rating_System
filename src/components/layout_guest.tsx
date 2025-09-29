@@ -22,7 +22,7 @@ export default function LayoutGuest({ children }: { children: ReactNode }) {
   ) : (
     <div className="w-screen h-screen overflow-hidden">
       <div className="flex items-center justify-center p-2 m-2 font-bold bg-white rounded-lg shadow-md">
-        <p>Music Classification</p>
+        <p>Lyric Classification</p>
       </div>
 
       <div>{children}</div>

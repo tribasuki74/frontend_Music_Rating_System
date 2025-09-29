@@ -138,7 +138,7 @@ export default function LayoutUser({
               ) : (
                 <div className="bg-green-500 rounded-full w-7 h-7"></div>
               )} */}
-              Music Classification
+              Lyric Classification
             </Link>
             <IoMenu
               className="lg:hidden"

@@ -1,7 +1,7 @@
 import { jwtDecode } from "jwt-decode";
 
-// export const BACKEND_FASTAPI = "http://localhost:8000/api";
-export const BACKEND_FASTAPI = "https://api-music.amanahnurehsan.org/api";
+export const BACKEND_FASTAPI = "http://localhost:8000/api";
+// export const BACKEND_FASTAPI = "https://api-music.amanahnurehsan.org/api";
 
 export const STORAGE_S3 = "https://s3.amanahnurehsan.org/music/uploads";
 

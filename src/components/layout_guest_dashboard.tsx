@@ -92,7 +92,7 @@ export default function LayoutGuestDashboard({
       <div className="relative overflow-y-hidden">
         <div className="absolute left-0 right-0">
           <div className="flex items-center justify-between p-3 m-2 text-lg font-bold bg-white rounded-lg shadow-md lg:justify-center">
-            <p>Music Classification</p>
+            <p>Lyric Classification</p>
             <IoMenu
               className="lg:hidden"
               size={28}

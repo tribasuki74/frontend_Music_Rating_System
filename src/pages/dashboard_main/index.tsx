@@ -188,7 +188,7 @@ export default function DashboardMainPage() {
 
           {/* <div className="p-4 bg-white rounded-lg shadow-md">
             <p className="mb-2 font-bold text-center">
-              About Music Classification
+              About Lyric Classification
             </p>
             <div className="bg-[#DBD2FE] w-52 h-52 rounded-lg"></div>
           </div> */}
