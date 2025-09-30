@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect, useState, type FormEvent } from "react";
 import LayoutUser from "../../components/layout_user";
 import { useParams } from "react-router-dom";
@@ -7,6 +8,7 @@ import AXIOS_INSTANCE from "../../utils/axios_instance";
 import useAuthUser from "react-auth-kit/hooks/useAuthUser";
 import { usePlayer } from "../../context/player";
 import { STORAGE_S3 } from "../../utils/constant";
+import type { userType } from "../../types/user";
 
 export default function RatingDetailPage() {
   const ratings = ["SU", "13+", "17+", "21+"];
@@ -14,8 +16,10 @@ export default function RatingDetailPage() {
   const authUser = useAuthUser() as { uuid: string } | null;
   const user_uuid = authUser ? authUser.uuid : null;
   const { currentTrack, updateCurrentTrackRating } = usePlayer();
+  const [isConfirmAuthenticated, setIsConfirmAuthenticated] = useState(false);
   const [loadingPage, setLoadingPage] = useState(true);
   const [loadingSubmit, setLoadingSubmit] = useState(false);
+  const [userData, setUserData] = useState<userType>();
   const [musicBackgroundColor, setMusicBackgroundColor] = useState<string>();
   const [musicCover, setMusicCover] = useState<string | null>(null);
   const [musicRating, setMusicRating] = useState<string | null>(null);
@@ -30,6 +34,16 @@ export default function RatingDetailPage() {
     }
     (async () => {
       try {
+        if (!isConfirmAuthenticated) {
+          const { data: resUser } = await AXIOS_INSTANCE.get(`/user/uuid`, {
+            params: {
+              uuid: user_uuid,
+            },
+          });
+          setUserData(resUser);
+          setIsConfirmAuthenticated(true);
+        }
+
         const { data: resMusicData } = await AXIOS_INSTANCE.get(
           `/user_upload`,
           { params: { uuid } }
@@ -147,7 +161,7 @@ export default function RatingDetailPage() {
   return loadingPage ? (
     <LoadingSpinner />
   ) : (
-    <LayoutUser isSidebar={false}>
+    <LayoutUser isSidebar={false} userData={userData!}>
       <div className="w-screen my-2 text-lg font-bold text-center">
         <p>Suggest a New Rating</p>
       </div>

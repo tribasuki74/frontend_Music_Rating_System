@@ -1,17 +1,56 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { IoCloudUploadOutline } from "react-icons/io5";
 import LayoutUser from "../../components/layout_user";
 import useAuthUser from "react-auth-kit/hooks/useAuthUser";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Swal from "sweetalert2";
 import LoadingSpinner from "../../components/loading";
 import AXIOS_INSTANCE from "../../utils/axios_instance";
 import { TO_UPLOAD_DETAIL } from "../../utils/paths";
+import type { userType } from "../../types/user";
 
 export default function UploadPage() {
   const authUser = useAuthUser() as { uuid: string } | null;
   const user_uuid = authUser ? authUser.uuid : null;
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [isConfirmAuthenticated, setIsConfirmAuthenticated] = useState(false);
+  const [loadingPage, setLoadingPage] = useState(true);
   const [loadingUpload, setLoadingUpload] = useState(false);
+  const [userData, setUserData] = useState<userType>();
+
+  useEffect(() => {
+    (async () => {
+      try {
+        if (!isConfirmAuthenticated) {
+          const { data: resUser } = await AXIOS_INSTANCE.get(`/user/uuid`, {
+            params: {
+              uuid: user_uuid,
+            },
+          });
+          setUserData(resUser);
+          setIsConfirmAuthenticated(true);
+        }
+      } catch (error) {
+        console.log(error);
+        const resSwal = await Swal.fire({
+          icon: "error",
+          title: "Failed",
+          text: "Failed to fetch user data",
+          allowOutsideClick: false,
+          didOpen: () => {
+            const container = document.querySelector(
+              ".swal2-container"
+            ) as HTMLElement;
+            if (container)
+              container.style.zIndex = "99999999999999999999999999999999";
+          },
+        });
+        if (resSwal.isConfirmed) window.location.reload();
+      } finally {
+        setLoadingPage(false);
+      }
+    })();
+  }, [user_uuid]);
 
   async function handleUpload(file: File) {
     if (!file || !user_uuid) return;
@@ -113,8 +152,10 @@ export default function UploadPage() {
     }
   }
 
-  return (
-    <LayoutUser>
+  return loadingPage ? (
+    <LoadingSpinner />
+  ) : (
+    <LayoutUser userData={userData!}>
       <div className="w-screen h-full overflow-hidden lg:w-full">
         <p className="m-2 text-base font-bold">Upload Your Own Music</p>
         <div className="p-4 bg-white rounded-lg shadow-md">

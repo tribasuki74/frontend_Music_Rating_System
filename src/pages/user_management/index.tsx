@@ -1,20 +1,48 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect, useState } from "react";
 import LoadingSpinner from "../../components/loading";
 import LayoutUser from "../../components/layout_user";
 import Swal from "sweetalert2";
 import AXIOS_INSTANCE from "../../utils/axios_instance";
 import type { userType } from "../../types/user";
-import { ROLE_USER, STORAGE_S3 } from "../../utils/constant";
+import {
+  ROLE_ADMINISTRATOR,
+  ROLE_USER,
+  STORAGE_S3,
+  ROLE_SUPER_ADMINISTRATOR,
+} from "../../utils/constant";
 import { truncateText } from "../../utils/truncate_text";
+import useAuthUser from "react-auth-kit/hooks/useAuthUser";
+import { TO_DASHBOARD_MAIN } from "../../utils/paths";
 
 export default function UserManagementPage() {
+  const authUser = useAuthUser() as { uuid: string } | null;
+  const user_uuid = authUser ? authUser.uuid : null;
+  const [isConfirmAuthenticated, setIsConfirmAuthenticated] = useState(false);
   const [loadingPage, setLoadingPage] = useState(true);
   const [loadingSuspend, setLoadingSuspend] = useState(false);
+  const [userData, setUserData] = useState<userType>();
+  const [refreshUserData, setRefreshUserData] = useState(false);
   const [listUser, setListUser] = useState<userType[]>([]);
 
   useEffect(() => {
     (async () => {
       try {
+        if (!isConfirmAuthenticated) {
+          const { data: resUser } = await AXIOS_INSTANCE.get(`/user/uuid`, {
+            params: {
+              uuid: user_uuid,
+            },
+          });
+          const permittedRoles = [ROLE_SUPER_ADMINISTRATOR, ROLE_ADMINISTRATOR];
+          if (!permittedRoles.includes(resUser.role)) {
+            window.location.href = TO_DASHBOARD_MAIN;
+            return;
+          }
+          setUserData(resUser);
+          setIsConfirmAuthenticated(true);
+        }
+
         const { data: resListUser } = await AXIOS_INSTANCE.get(`/user`, {
           params: {
             limit: "999999",
@@ -42,22 +70,18 @@ export default function UserManagementPage() {
         setLoadingPage(false);
       }
     })();
-  }, []);
+  }, [refreshUserData]);
 
   async function handleSuspend(uuid: string, status: boolean) {
     if (loadingSuspend) return;
     setLoadingSuspend(true);
     try {
-      setListUser((prev) =>
-        prev.map((user) =>
-          user.uuid === uuid ? { ...user, is_active: !status } : user
-        )
-      );
       await AXIOS_INSTANCE.put(
         `/user/suspend`,
         { is_active: !status },
         { params: { uuid } }
       );
+      setRefreshUserData(!refreshUserData);
     } catch (error) {
       console.log(error);
       Swal.fire({
@@ -81,7 +105,7 @@ export default function UserManagementPage() {
   return loadingPage ? (
     <LoadingSpinner />
   ) : (
-    <LayoutUser>
+    <LayoutUser userData={userData!}>
       <div className="h-full mt-2 overflow-hidden lg:mt-0">
         <p className="mb-2 font-bold">User Management</p>
         <div className="w-full h-full p-4 bg-white rounded-lg shadow-md">
@@ -92,9 +116,11 @@ export default function UserManagementPage() {
                   <td className="pb-2">Username</td>
                   <td className="px-2 text-nowrap">Name</td>
                   <td className="px-2 text-nowrap">Email</td>
-                  <td className="px-2 text-nowrap">Date Birth</td>
-                  <td className="px-2 text-nowrap">Status</td>
-                  <td className="px-2 text-nowrap">Suspend</td>
+                  <td className="px-2 text-center text-nowrap">
+                    User Reported
+                  </td>
+                  <td className="px-2 text-center text-nowrap">Status</td>
+                  <td className="px-2 text-center text-nowrap">Suspend</td>
                 </tr>
               </thead>
 
@@ -130,15 +156,19 @@ export default function UserManagementPage() {
                         {item.first_name} {item.last_name}
                       </td>
                       <td className="pr-2 text-nowrap">{item.email}</td>
-                      <td className="pr-2 text-nowrap">{item.date_birth}</td>
-                      <td className="pr-2 text-nowrap">
+                      <td className="pr-2 text-center text-nowrap">
+                        {index + 2}
+                      </td>
+                      <td className="pr-2 text-center text-nowrap">
                         {item.is_active ? "Active" : "Suspend"}
                       </td>
                       <td
-                        className="pr-2 font-bold text-red-500 cursor-pointer text-nowrap"
+                        className={`pr-2 font-bold cursor-pointer text-nowrap text-center ${
+                          item.is_active ? "text-red-500" : "text-blue-500"
+                        }`}
                         onClick={() => handleSuspend(item.uuid, item.is_active)}
                       >
-                        Suspend
+                        {item.is_active ? "Suspend" : "Unsuspend"}
                       </td>
                     </tr>
                   );

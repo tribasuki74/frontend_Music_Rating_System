@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import Swal from "sweetalert2";
 import LayoutUser from "../../components/layout_user";
@@ -28,14 +29,20 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import type { userType } from "../../types/user";
+import useAuthUser from "react-auth-kit/hooks/useAuthUser";
 
 export default function MyPlaylistDetailPage() {
   const { user_playlist_uuid } = useParams<{ user_playlist_uuid: string }>();
   const navigate = useNavigate();
   const { playTrack } = usePlayer();
   const sensors = useSensors(useSensor(PointerSensor));
+  const authUser = useAuthUser() as { uuid: string } | null;
+  const user_uuid = authUser ? authUser.uuid : null;
+  const [isConfirmAuthenticated, setIsConfirmAuthenticated] = useState(false);
   const [loadingPage, setLoadingPage] = useState(true);
   const [loadingMove, setLoadingMove] = useState(false);
+  const [userData, setUserData] = useState<userType>();
   const [playlistName, setPlaylistName] = useState("");
   const [refreshMyMusicPlaylist, setRefreshMyMusicPlaylist] = useState(false);
   const [myMusic, setMyMusic] = useState<
@@ -49,6 +56,16 @@ export default function MyPlaylistDetailPage() {
     }
     (async () => {
       try {
+        if (!isConfirmAuthenticated) {
+          const { data: resUser } = await AXIOS_INSTANCE.get(`/user/uuid`, {
+            params: {
+              uuid: user_uuid,
+            },
+          });
+          setUserData(resUser);
+          setIsConfirmAuthenticated(true);
+        }
+
         const { data: resMyPlaylist } = await AXIOS_INSTANCE.get(
           `/user_playlist/get_by_uuid`,
           { params: { uuid: user_playlist_uuid } }
@@ -122,7 +139,7 @@ export default function MyPlaylistDetailPage() {
   return loadingPage ? (
     <LoadingSpinner />
   ) : (
-    <LayoutUser>
+    <LayoutUser userData={userData!}>
       <div className="h-full mt-2 overflow-hidden lg:mt-0">
         <p className="mb-2 font-bold">{playlistName}</p>
         <div className="w-full h-full p-4 bg-white rounded-lg shadow-md">

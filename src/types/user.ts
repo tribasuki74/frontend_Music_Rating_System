@@ -9,6 +9,7 @@ export type userType = {
   date_birth: string;
   is_active: boolean;
   background_color: string;
+  role: string;
   profile_picture?: string;
   user_genres: genreType[];
 };

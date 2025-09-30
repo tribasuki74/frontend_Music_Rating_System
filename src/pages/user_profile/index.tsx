@@ -30,6 +30,8 @@ export default function UserProfilePage() {
     username: "",
     date_birth: "",
     uuid: "",
+    role: "",
+    is_active: true,
     user_genres: [],
   });
 
@@ -96,7 +98,7 @@ export default function UserProfilePage() {
   return loadingPage ? (
     <LoadingSpinner />
   ) : (
-    <LayoutUser>
+    <LayoutUser userData={userData!}>
       <p className="my-2 font-bold">User Profile</p>
       <div className="px-8 py-6 bg-white rounded-lg shadow-md">
         <div className="flex items-center justify-between">

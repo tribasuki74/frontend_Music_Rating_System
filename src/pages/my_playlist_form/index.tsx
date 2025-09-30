@@ -1,14 +1,21 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect, useState } from "react";
 import LayoutUser from "../../components/layout_user";
 import LoadingSpinner from "../../components/loading";
 import Swal from "sweetalert2";
 import AXIOS_INSTANCE from "../../utils/axios_instance";
 import { useParams } from "react-router-dom";
+import type { userType } from "../../types/user";
+import useAuthUser from "react-auth-kit/hooks/useAuthUser";
 
 export default function MyPlaylistFormPage() {
   const { uuid } = useParams<{ uuid?: string }>();
+  const authUser = useAuthUser() as { uuid: string } | null;
+  const user_uuid = authUser ? authUser.uuid : null;
+  const [isConfirmAuthenticated, setIsConfirmAuthenticated] = useState(false);
   const [loadingPage, setLoadingPage] = useState(true);
   const [loadingSubmit, setLoadingSubmit] = useState(false);
+  const [userData, setUserData] = useState<userType>();
   const [formPlaylistName, setFormPlaylistName] = useState<string | null>(null);
   const [formVisibility, setFormVisibility] = useState<string | null>(null);
 
@@ -19,6 +26,16 @@ export default function MyPlaylistFormPage() {
     }
     (async () => {
       try {
+        if (!isConfirmAuthenticated) {
+          const { data: resUser } = await AXIOS_INSTANCE.get(`/user/uuid`, {
+            params: {
+              uuid: user_uuid,
+            },
+          });
+          setUserData(resUser);
+          setIsConfirmAuthenticated(true);
+        }
+
         const { data: resMyPlaylist } = await AXIOS_INSTANCE.get(
           `/user_playlist/get_by_uuid`,
           { params: { uuid } }
@@ -122,7 +139,7 @@ export default function MyPlaylistFormPage() {
   return loadingPage ? (
     <LoadingSpinner />
   ) : (
-    <LayoutUser isSidebar={false}>
+    <LayoutUser isSidebar={false} userData={userData!}>
       <div className="w-screen my-2 text-lg font-bold text-center">
         <p>Create a New Playlist</p>
       </div>

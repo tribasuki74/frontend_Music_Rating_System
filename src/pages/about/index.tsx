@@ -1,8 +1,52 @@
+import { useEffect, useState } from "react";
 import LayoutUser from "../../components/layout_user";
+import type { userType } from "../../types/user";
+import LoadingSpinner from "../../components/loading";
+import Swal from "sweetalert2";
+import AXIOS_INSTANCE from "../../utils/axios_instance";
+import useAuthUser from "react-auth-kit/hooks/useAuthUser";
 
 export default function AboutEducationPage() {
-  return (
-    <LayoutUser>
+  const [loadingPage, setLoadingPage] = useState(true);
+  const authUser = useAuthUser() as { uuid: string } | null;
+  const user_uuid = authUser ? authUser.uuid : null;
+  const [userData, setUserData] = useState<userType>();
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const { data: resUser } = await AXIOS_INSTANCE.get(`/user/uuid`, {
+          params: {
+            uuid: user_uuid,
+          },
+        });
+        setUserData(resUser);
+      } catch (error) {
+        console.log(error);
+        const resSwal = await Swal.fire({
+          icon: "error",
+          title: "Failed",
+          text: "Failed to fetch user data",
+          allowOutsideClick: false,
+          didOpen: () => {
+            const container = document.querySelector(
+              ".swal2-container"
+            ) as HTMLElement;
+            if (container)
+              container.style.zIndex = "99999999999999999999999999999999";
+          },
+        });
+        if (resSwal.isConfirmed) window.location.reload();
+      } finally {
+        setLoadingPage(false);
+      }
+    })();
+  }, [user_uuid]);
+
+  return loadingPage ? (
+    <LoadingSpinner />
+  ) : (
+    <LayoutUser userData={userData!}>
       <div className="h-full overflow-hidden">
         <p className="m-2 text-base font-bold">About & Education</p>
         <div className="p-4 bg-white rounded-lg shadow-md">

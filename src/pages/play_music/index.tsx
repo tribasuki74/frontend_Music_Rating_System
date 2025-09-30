@@ -24,13 +24,16 @@ import {
   AiOutlineLike,
 } from "react-icons/ai";
 import { IoArrowDownCircleOutline } from "react-icons/io5";
+import type { userType } from "../../types/user";
 
 export default function PlayMusicPage() {
   const { uuid } = useParams<{ uuid: string }>();
   const authUser = useAuthUser() as { uuid: string } | null;
   const user_uuid = authUser ? authUser.uuid : null;
   const { currentTrack, playTrack } = usePlayer();
+  const [isConfirmAuthenticated, setIsConfirmAuthenticated] = useState(false);
   const [loadingPage, setLoadingPage] = useState(true);
+  const [userData, setUserData] = useState<userType>();
   const [ageLabelRating, setAgeLabelRating] = useState<string | null>(null);
   const [musicBackgroundColor, setMusicBackgroundColor] = useState<string>();
   const [thumbnailFilename, setThumbnailFilename] = useState<string | null>(
@@ -51,6 +54,16 @@ export default function PlayMusicPage() {
     (async () => {
       setLoadingPage(true);
       try {
+        if (!isConfirmAuthenticated) {
+          const { data: resUser } = await AXIOS_INSTANCE.get(`/user/uuid`, {
+            params: {
+              uuid: user_uuid,
+            },
+          });
+          setUserData(resUser);
+          setIsConfirmAuthenticated(true);
+        }
+
         const { data: resUserUpl } = await AXIOS_INSTANCE.get(`/user_upload`, {
           params: {
             uuid,
@@ -217,7 +230,7 @@ export default function PlayMusicPage() {
   return loadingPage ? (
     <LoadingSpinner />
   ) : (
-    <LayoutUser isSidebar={false}>
+    <LayoutUser isSidebar={false} userData={userData!}>
       <div className="w-screen flex gap-6 flex-col items-center justify-center h-full bg-[#DBD2FE]">
         <div className="rounded-lg relative overflow-hidden shadow-md h-60 w-[80%] lg:w-[30%]">
           {thumbnailFilename ? (

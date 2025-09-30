@@ -38,25 +38,22 @@ import {
 import { formatTime } from "../utils/format_time";
 import { truncateText } from "../utils/truncate_text";
 import { GoKebabHorizontal } from "react-icons/go";
-import useAuthUser from "react-auth-kit/hooks/useAuthUser";
-import AXIOS_INSTANCE from "../utils/axios_instance";
-import Swal from "sweetalert2";
+import type { userType } from "../types/user";
 
 export default function LayoutUser({
   children,
   isSidebar = true,
+  userData,
 }: {
   children: ReactNode;
   isSidebar?: boolean;
+  userData: userType;
 }) {
   const { pathname } = useLocation();
   const [loading, setLoading] = useState(true);
   const [isOpenDrawer, setIsOpenDrawer] = useState(false);
   const [isOpenMenuDropdown, setIsOpenMenuDropdown] = useState(false);
   const isAuthenticated = useIsAuthenticated();
-  const authUser = useAuthUser() as { uuid: string } | null;
-  const user_uuid = authUser ? authUser.uuid : null;
-  const [userData, setUserData] = useState({ role: "" });
   const {
     currentTrack,
     isPlaying,
@@ -70,34 +67,8 @@ export default function LayoutUser({
   const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
 
   useEffect(() => {
-    if (isAuthenticated && user_uuid) {
-      (async () => {
-        try {
-          const { data: resUser } = await AXIOS_INSTANCE.get(`/user/uuid`, {
-            params: {
-              uuid: user_uuid,
-            },
-          });
-          setUserData(resUser);
-        } catch (error) {
-          console.log(error);
-          Swal.fire({
-            icon: "error",
-            title: "Failed",
-            text: "Failed to fetch user data",
-            allowOutsideClick: false,
-            didOpen: () => {
-              const container = document.querySelector(
-                ".swal2-container"
-              ) as HTMLElement;
-              if (container)
-                container.style.zIndex = "99999999999999999999999999999999";
-            },
-          });
-        } finally {
-          setLoading(false);
-        }
-      })();
+    if (isAuthenticated) {
+      setLoading(false);
     } else {
       window.location.href = TO_DASHBOARD_GUEST;
     }
@@ -105,7 +76,6 @@ export default function LayoutUser({
     isAuthenticated,
     currentTrack?.user_rating,
     currentTrack?.ai_rating_result,
-    user_uuid,
   ]);
 
   const layout_items = [

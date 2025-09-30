@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import useAuthUser from "react-auth-kit/hooks/useAuthUser";
 import LayoutUser from "../../components/layout_user";
 import { Link } from "react-router-dom";
@@ -11,13 +12,16 @@ import QueryString from "qs";
 import type { myPlaylistType } from "../../types/playlist";
 import PlayMusicCard from "../../components/play_music_card";
 import PlaylistCard from "../../components/playlist_card";
+import type { userType } from "../../types/user";
 
 export default function ExploreSearchPage() {
   const authUser = useAuthUser() as { uuid: string } | null;
   const user_uuid = authUser ? authUser.uuid : null;
+  const [isConfirmAuthenticated, setIsConfirmAuthenticated] = useState(false);
   const [viewSearch, setViewSearch] = useState(false);
   const [loadingPage, setLoadingPage] = useState(true);
   const [loadingSearch, setLoadingSearch] = useState(false);
+  const [userData, setUserData] = useState<userType>();
   const [musicRecentlyAdded, setMusicRecentlyAdded] = useState<
     masterDataType[]
   >([]);
@@ -39,6 +43,16 @@ export default function ExploreSearchPage() {
     }
     (async () => {
       try {
+        if (!isConfirmAuthenticated) {
+          const { data: resUser } = await AXIOS_INSTANCE.get(`/user/uuid`, {
+            params: {
+              uuid: user_uuid,
+            },
+          });
+          setUserData(resUser);
+          setIsConfirmAuthenticated(true);
+        }
+
         const { data: resPublicPlaylist } = await AXIOS_INSTANCE.get(
           `/user_playlist/get_public_playlist`,
           {
@@ -156,7 +170,7 @@ export default function ExploreSearchPage() {
   return loadingPage ? (
     <LoadingSpinner />
   ) : (
-    <LayoutUser>
+    <LayoutUser userData={userData!}>
       <div className="relative mb-[200px] lg:mb-[158px] pr-2 z-10">
         <div className="fixed bg-[#F8EFE5] right-3 left-3 lg:left-64">
           <p className="my-2 font-bold">Explore / Discover Music</p>

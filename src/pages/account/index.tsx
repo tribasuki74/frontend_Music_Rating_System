@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useRef, useState } from "react";
 import LayoutUser from "../../components/layout_user";
@@ -19,9 +20,11 @@ export default function AccountPage() {
   const user_uuid = authUser ? authUser.uuid : null;
   const signOut = useSignOut();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [isConfirmAuthenticated, setIsConfirmAuthenticated] = useState(false);
   const [loadingPage, setLoadingPage] = useState(true);
   const [loadingSubmit, setLoadingSubmit] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
+  const [userData, setUserData] = useState<userType>();
   const [musicHistory, setMusicHistory] = useState<
     { user_upload: masterDataType; user: userType }[]
   >([]);
@@ -50,6 +53,16 @@ export default function AccountPage() {
         return;
       }
       try {
+        if (!isConfirmAuthenticated) {
+          const { data: resUser } = await AXIOS_INSTANCE.get(`/user/uuid`, {
+            params: {
+              uuid: user_uuid,
+            },
+          });
+          setUserData(resUser);
+          setIsConfirmAuthenticated(true);
+        }
+
         const { data: resHistory } = await AXIOS_INSTANCE.get(`/user_history`, {
           params: {
             user_uuid: user_uuid,
@@ -231,7 +244,7 @@ export default function AccountPage() {
   return loadingPage ? (
     <LoadingSpinner />
   ) : (
-    <LayoutUser>
+    <LayoutUser userData={userData!}>
       <p className="mt-2 mb-2 font-bold lg:mt-0">Listen Again</p>
       <div className="flex gap-4 pb-2 overflow-x-auto hide-scrollbar">
         {musicHistory.map((item, index) => (

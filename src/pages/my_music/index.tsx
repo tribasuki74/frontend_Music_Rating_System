@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import Swal from "sweetalert2";
 import LayoutUser from "../../components/layout_user";
 import useAuthUser from "react-auth-kit/hooks/useAuthUser";
@@ -12,13 +13,16 @@ import { TO_PLAY_MUSIC, TO_UPLOAD_DETAIL } from "../../utils/paths";
 import LoadingSpinner from "../../components/loading";
 import { STORAGE_S3 } from "../../utils/constant";
 import { deleteData } from "../../components/delete_data";
+import type { userType } from "../../types/user";
 
 export default function MyMusicPage() {
   const authUser = useAuthUser() as { uuid: string } | null;
   const user_uuid = authUser ? authUser.uuid : null;
   const navigate = useNavigate();
   const { playTrack } = usePlayer();
+  const [isConfirmAuthenticated, setIsConfirmAuthenticated] = useState(false);
   const [loadingPage, setLoadingPage] = useState(true);
+  const [userData, setUserData] = useState<userType>();
   const [refreshMyMusic, setRefreshMyMusic] = useState(false);
   const [myMusic, setMyMusic] = useState<masterDataType[]>([]);
 
@@ -29,6 +33,16 @@ export default function MyMusicPage() {
     }
     (async () => {
       try {
+        if (!isConfirmAuthenticated) {
+          const { data: resUser } = await AXIOS_INSTANCE.get(`/user/uuid`, {
+            params: {
+              uuid: user_uuid,
+            },
+          });
+          setUserData(resUser);
+          setIsConfirmAuthenticated(true);
+        }
+
         const { data: resMyMusic } = await AXIOS_INSTANCE.get(`/user_upload`, {
           params: {
             limit: "999999",
@@ -61,7 +75,7 @@ export default function MyMusicPage() {
   return loadingPage ? (
     <LoadingSpinner />
   ) : (
-    <LayoutUser>
+    <LayoutUser userData={userData!}>
       <div className="h-full mt-2 overflow-hidden lg:mt-0">
         <p className="mb-2 font-bold">My Music</p>
         <div className="w-full h-full p-4 bg-white rounded-lg shadow-md">

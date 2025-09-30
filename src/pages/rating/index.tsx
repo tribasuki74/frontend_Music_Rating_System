@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect, useState } from "react";
 import LayoutUser from "../../components/layout_user";
 import LoadingSpinner from "../../components/loading";
@@ -12,11 +13,14 @@ import {
   ROLE_ADMINISTRATOR,
   ROLE_SUPER_ADMINISTRATOR,
 } from "../../utils/constant";
+import type { userType } from "../../types/user";
 
 export default function RatingPage() {
   const authUser = useAuthUser() as { uuid: string } | null;
   const user_uuid = authUser ? authUser.uuid : null;
+  const [isConfirmAuthenticated, setIsConfirmAuthenticated] = useState(false);
   const [loadingPage, setLoadingPage] = useState(true);
+  const [userData, setUserData] = useState<userType>();
   const [userRating, setUserRating] = useState<
     { rating: string; reason: string; user_upload: masterDataType }[]
   >([]);
@@ -28,6 +32,16 @@ export default function RatingPage() {
     }
     (async () => {
       try {
+        if (!isConfirmAuthenticated) {
+          const { data: resUser } = await AXIOS_INSTANCE.get(`/user/uuid`, {
+            params: {
+              uuid: user_uuid,
+            },
+          });
+          setUserData(resUser);
+          setIsConfirmAuthenticated(true);
+        }
+
         const { data: resUserData } = await AXIOS_INSTANCE.get(`/user`, {
           params: { uuid: user_uuid },
         });
@@ -81,7 +95,7 @@ export default function RatingPage() {
   return loadingPage ? (
     <LoadingSpinner />
   ) : (
-    <LayoutUser>
+    <LayoutUser userData={userData!}>
       <div className="h-full overflow-hidden">
         <p className="m-2 text-base font-bold">Rating & Review</p>
         <div className="p-4 bg-white rounded-lg shadow-md">

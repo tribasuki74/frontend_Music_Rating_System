@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import Swal from "sweetalert2";
 import LayoutUser from "../../components/layout_user";
 import { Link, useNavigate, useParams } from "react-router-dom";
@@ -9,11 +10,17 @@ import { deleteData } from "../../components/delete_data";
 import { truncateText } from "../../utils/truncate_text";
 import type { myPlaylistType } from "../../types/playlist";
 import { FaArrowCircleRight } from "react-icons/fa";
+import useAuthUser from "react-auth-kit/hooks/useAuthUser";
+import type { userType } from "../../types/user";
 
 export default function MyPlaylistPage() {
-  const { user_upload_uuid } = useParams<{ user_upload_uuid?: string }>();
   const navigate = useNavigate();
+  const authUser = useAuthUser() as { uuid: string } | null;
+  const user_uuid = authUser ? authUser.uuid : null;
+  const { user_upload_uuid } = useParams<{ user_upload_uuid?: string }>();
+  const [isConfirmAuthenticated, setIsConfirmAuthenticated] = useState(false);
   const [loadingPage, setLoadingPage] = useState(true);
+  const [userData, setUserData] = useState<userType>();
   const [loadingInsertPlaylist, setLoadingInsertPlaylist] = useState(false);
   const [refreshMyPlaylist, setRefreshMyPlaylist] = useState(false);
   const [myMusic, setMyPlaylist] = useState<myPlaylistType[]>([]);
@@ -21,6 +28,16 @@ export default function MyPlaylistPage() {
   useEffect(() => {
     (async () => {
       try {
+        if (!isConfirmAuthenticated) {
+          const { data: resUser } = await AXIOS_INSTANCE.get(`/user/uuid`, {
+            params: {
+              uuid: user_uuid,
+            },
+          });
+          setUserData(resUser);
+          setIsConfirmAuthenticated(true);
+        }
+
         const { data: resMyPlaylist } = await AXIOS_INSTANCE.get(
           `/user_playlist/get_by_user`,
           {
@@ -99,7 +116,7 @@ export default function MyPlaylistPage() {
   return loadingPage ? (
     <LoadingSpinner />
   ) : (
-    <LayoutUser>
+    <LayoutUser userData={userData!}>
       <div className="h-full mt-2 overflow-hidden lg:mt-0">
         <p className="mb-2 font-bold">My Playlist</p>
         <div className="w-full h-full p-4 bg-white rounded-lg shadow-md">

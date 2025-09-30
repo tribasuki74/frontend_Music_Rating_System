@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { Link, useParams } from "react-router-dom";
 import LayoutUser from "../../components/layout_user";
 import { useEffect, useRef, useState, type FormEvent } from "react";
@@ -6,13 +7,19 @@ import AXIOS_INSTANCE from "../../utils/axios_instance";
 import Swal from "sweetalert2";
 import { TO_MY_MUSIC, TO_PLAY_MUSIC } from "../../utils/paths";
 import { STORAGE_S3 } from "../../utils/constant";
+import type { userType } from "../../types/user";
+import useAuthUser from "react-auth-kit/hooks/useAuthUser";
 
 export default function UploadDetailPage() {
   const visibility = ["public", "private", "unlist"];
   const { uuid } = useParams<{ uuid: string }>();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const authUser = useAuthUser() as { uuid: string } | null;
+  const user_uuid = authUser ? authUser.uuid : null;
+  const [isConfirmAuthenticated, setIsConfirmAuthenticated] = useState(false);
   const [loadingPage, setLoadingPage] = useState(true);
   const [loadingSubmit, setLoadingSubmit] = useState(false);
+  const [userData, setUserData] = useState<userType>();
   const [genreData, setGenreData] = useState<{ name: string; uuid: string }[]>(
     []
   );
@@ -32,6 +39,16 @@ export default function UploadDetailPage() {
     (async () => {
       setLoadingPage(true);
       try {
+        if (!isConfirmAuthenticated) {
+          const { data: resUser } = await AXIOS_INSTANCE.get(`/user/uuid`, {
+            params: {
+              uuid: user_uuid,
+            },
+          });
+          setUserData(resUser);
+          setIsConfirmAuthenticated(true);
+        }
+
         const { data: resGenre } = await AXIOS_INSTANCE.get(`/genre`, {
           params: {
             limit: "999999",
@@ -154,7 +171,7 @@ export default function UploadDetailPage() {
   return loadingPage ? (
     <LoadingSpinner />
   ) : (
-    <LayoutUser>
+    <LayoutUser userData={userData!}>
       <p className="m-2 text-base font-bold">Upload Your Own Music</p>
       <form className="p-6 bg-white rounded-lg shadow-md" onSubmit={onSubmit}>
         <p className="text-lg font-semibold">Details</p>

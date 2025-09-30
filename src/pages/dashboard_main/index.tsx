@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect, useState } from "react";
 import LayoutUser from "../../components/layout_user";
 import Swal from "sweetalert2";
@@ -12,13 +13,16 @@ import useAuthUser from "react-auth-kit/hooks/useAuthUser";
 import type { masterDataType } from "../../types/music";
 import { STORAGE_S3 } from "../../utils/constant";
 import PlayMusicCard from "../../components/play_music_card";
+import type { userType } from "../../types/user";
 
 export default function DashboardMainPage() {
   const authUser = useAuthUser() as { uuid: string } | null;
   const user_uuid = authUser ? authUser.uuid : null;
   const navigate = useNavigate();
   const { playTrack } = usePlayer();
+  const [isConfirmAuthenticated, setIsConfirmAuthenticated] = useState(false);
   const [loadingPage, setLoadingPage] = useState(true);
+  const [userData, setUserData] = useState<userType>();
   const [recentlyAdded, setRecentlyAdded] = useState<masterDataType[]>([]);
   const [recommendation, setRecommendation] = useState<masterDataType[]>([]);
 
@@ -29,6 +33,16 @@ export default function DashboardMainPage() {
     }
     (async () => {
       try {
+        if (!isConfirmAuthenticated) {
+          const { data: resUser } = await AXIOS_INSTANCE.get(`/user/uuid`, {
+            params: {
+              uuid: user_uuid,
+            },
+          });
+          setUserData(resUser);
+          setIsConfirmAuthenticated(true);
+        }
+
         const { data: resRecentlyAdded } = await AXIOS_INSTANCE.get(
           `/user_upload`,
           {
@@ -80,7 +94,7 @@ export default function DashboardMainPage() {
   return loadingPage ? (
     <LoadingSpinner />
   ) : (
-    <LayoutUser>
+    <LayoutUser userData={userData!}>
       <div className="h-full mt-2 overflow-hidden lg:mt-0">
         <p className="mb-2 font-bold">Recently Added</p>
         <div className="w-full">
