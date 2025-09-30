@@ -13,6 +13,7 @@ export const TO_UPLOAD = "/upload";
 export const TO_UPLOAD_DETAIL = "/upload_detail";
 export const TO_ACCOUNT = "/account";
 export const TO_USER_PROFILE = "/user_profile";
+export const TO_USER_MANAGEMENT = "/user_management";
 export const TO_PLAY_MUSIC = "/play_music";
 export const TO_ABOUT = "/about";
 export const TO_MY_MUSIC = "/my_music";

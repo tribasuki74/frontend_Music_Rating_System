@@ -7,6 +7,7 @@ export type userType = {
   email: string;
   username: string;
   date_birth: string;
+  is_active: boolean;
   background_color: string;
   profile_picture?: string;
   user_genres: genreType[];

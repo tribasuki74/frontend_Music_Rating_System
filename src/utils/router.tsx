@@ -22,6 +22,7 @@ import {
   TO_TRENDING_MORE,
   TO_UPLOAD,
   TO_UPLOAD_DETAIL,
+  TO_USER_MANAGEMENT,
   TO_USER_PROFILE,
 } from "./paths";
 import DashboardMainPage from "../pages/dashboard_main";
@@ -47,6 +48,7 @@ import MyPlaylistFormPage from "../pages/my_playlist_form";
 import PublicPlaylistPage from "../pages/public_playlist";
 import PublicPlaylistDetailPage from "../pages/public_playlist_detail";
 import UserProfilePage from "../pages/user_profile";
+import UserManagementPage from "../pages/user_management";
 
 export const ROUTER = createBrowserRouter([
   {
@@ -116,6 +118,10 @@ export const ROUTER = createBrowserRouter([
   {
     path: TO_MY_MUSIC,
     element: <MyMusicPage />,
+  },
+  {
+    path: TO_USER_MANAGEMENT,
+    element: <UserManagementPage />,
   },
   {
     path: TO_PUBLIC_PLAYLIST,

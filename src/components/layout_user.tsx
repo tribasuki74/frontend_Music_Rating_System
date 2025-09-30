@@ -23,15 +23,24 @@ import {
   TO_TRENDING,
   TO_UPLOAD,
   TO_UPLOAD_DETAIL,
+  TO_USER_MANAGEMENT,
 } from "../utils/paths";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import LoadingSpinner from "./loading";
 import useIsAuthenticated from "react-auth-kit/hooks/useIsAuthenticated";
 import { usePlayer } from "../context/player";
-import { STORAGE_S3 } from "../utils/constant";
+import {
+  ROLE_ADMINISTRATOR,
+  ROLE_SUPER_ADMINISTRATOR,
+  ROLE_USER,
+  STORAGE_S3,
+} from "../utils/constant";
 import { formatTime } from "../utils/format_time";
 import { truncateText } from "../utils/truncate_text";
 import { GoKebabHorizontal } from "react-icons/go";
+import useAuthUser from "react-auth-kit/hooks/useAuthUser";
+import AXIOS_INSTANCE from "../utils/axios_instance";
+import Swal from "sweetalert2";
 
 export default function LayoutUser({
   children,
@@ -41,12 +50,13 @@ export default function LayoutUser({
   isSidebar?: boolean;
 }) {
   const { pathname } = useLocation();
-  // const isPlayMusic = matchPath(`${TO_PLAY_MUSIC}/:uuid`, pathname);
-  // const isRatingDetail = matchPath(`${TO_RATING_DETAIL}/:uuid`, pathname);
   const [loading, setLoading] = useState(true);
   const [isOpenDrawer, setIsOpenDrawer] = useState(false);
   const [isOpenMenuDropdown, setIsOpenMenuDropdown] = useState(false);
   const isAuthenticated = useIsAuthenticated();
+  const authUser = useAuthUser() as { uuid: string } | null;
+  const user_uuid = authUser ? authUser.uuid : null;
+  const [userData, setUserData] = useState({ role: "" });
   const {
     currentTrack,
     isPlaying,
@@ -60,17 +70,42 @@ export default function LayoutUser({
   const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
 
   useEffect(() => {
-    if (!isAuthenticated) {
+    if (isAuthenticated && user_uuid) {
       (async () => {
-        window.location.href = TO_DASHBOARD_GUEST;
+        try {
+          const { data: resUser } = await AXIOS_INSTANCE.get(`/user/uuid`, {
+            params: {
+              uuid: user_uuid,
+            },
+          });
+          setUserData(resUser);
+        } catch (error) {
+          console.log(error);
+          Swal.fire({
+            icon: "error",
+            title: "Failed",
+            text: "Failed to fetch user data",
+            allowOutsideClick: false,
+            didOpen: () => {
+              const container = document.querySelector(
+                ".swal2-container"
+              ) as HTMLElement;
+              if (container)
+                container.style.zIndex = "99999999999999999999999999999999";
+            },
+          });
+        } finally {
+          setLoading(false);
+        }
       })();
     } else {
-      setLoading(false);
+      window.location.href = TO_DASHBOARD_GUEST;
     }
   }, [
     isAuthenticated,
     currentTrack?.user_rating,
     currentTrack?.ai_rating_result,
+    user_uuid,
   ]);
 
   const layout_items = [
@@ -78,46 +113,61 @@ export default function LayoutUser({
       name: "Recommendation",
       link: TO_DASHBOARD_MAIN,
       link_active: [TO_DASHBOARD_MAIN],
+      role_user: [ROLE_ADMINISTRATOR, ROLE_SUPER_ADMINISTRATOR, ROLE_USER],
     },
     {
       name: "Explore / Discover",
       link: TO_EXPLORE_SEARCH,
       link_active: [TO_EXPLORE_SEARCH, TO_PUBLIC_PLAYLIST],
+      role_user: [ROLE_ADMINISTRATOR, ROLE_SUPER_ADMINISTRATOR, ROLE_USER],
     },
     {
       name: "Rating & Review",
       link: TO_RATING,
       link_active: [TO_RATING],
+      role_user: [ROLE_ADMINISTRATOR, ROLE_SUPER_ADMINISTRATOR, ROLE_USER],
     },
     {
       name: "Trending",
       link: TO_TRENDING,
       link_active: [TO_TRENDING],
+      role_user: [ROLE_ADMINISTRATOR, ROLE_SUPER_ADMINISTRATOR, ROLE_USER],
     },
     {
       name: "Upload Music",
       link: TO_UPLOAD,
       link_active: [TO_UPLOAD, TO_UPLOAD_DETAIL],
+      role_user: [ROLE_ADMINISTRATOR, ROLE_SUPER_ADMINISTRATOR, ROLE_USER],
     },
     {
       name: "My Music",
       link: TO_MY_MUSIC,
       link_active: [TO_MY_MUSIC],
+      role_user: [ROLE_ADMINISTRATOR, ROLE_SUPER_ADMINISTRATOR, ROLE_USER],
     },
     {
       name: "My Playlist",
       link: TO_MY_PLAYLIST,
       link_active: [TO_MY_PLAYLIST],
+      role_user: [ROLE_ADMINISTRATOR, ROLE_SUPER_ADMINISTRATOR, ROLE_USER],
     },
     {
       name: "About & Education",
       link: TO_ABOUT,
       link_active: [TO_ABOUT],
+      role_user: [ROLE_ADMINISTRATOR, ROLE_SUPER_ADMINISTRATOR, ROLE_USER],
+    },
+    {
+      name: "User Management",
+      link: TO_USER_MANAGEMENT,
+      link_active: [TO_USER_MANAGEMENT],
+      role_user: [ROLE_ADMINISTRATOR, ROLE_SUPER_ADMINISTRATOR],
     },
     {
       name: "Account",
       link: TO_ACCOUNT,
       link_active: [TO_ACCOUNT],
+      role_user: [ROLE_ADMINISTRATOR, ROLE_SUPER_ADMINISTRATOR, ROLE_USER],
     },
   ];
 
@@ -133,11 +183,6 @@ export default function LayoutUser({
               className="flex items-center justify-center gap-2 font-bold"
             >
               <IoHome size={18} className="ml-2" />
-              {/* {isPlayMusic || isRatingDetail ? (
-                <IoHome size={18} className="ml-2" />
-              ) : (
-                <div className="bg-green-500 rounded-full w-7 h-7"></div>
-              )} */}
               Lyric Classification
             </Link>
             <IoMenu
@@ -152,22 +197,24 @@ export default function LayoutUser({
           {isSidebar && (
             <div className="hidden overflow-auto hide-scrollbar lg:block">
               <ul className="flex flex-col h-full gap-4 p-4 overflow-auto font-semibold bg-white rounded-lg shadow-md hide-scrollbar w-60">
-                {layout_items.map((item, index) => (
-                  <li key={index}>
-                    <Link
-                      className={`hover:text-[#493D9E] hover:font-bold ${
-                        item.link_active.some((l) =>
-                          l === "/" ? pathname === l : pathname.startsWith(l)
-                        )
-                          ? "text-[#493D9E] font-bold"
-                          : ""
-                      }`}
-                      to={item.link}
-                    >
-                      {item.name}
-                    </Link>
-                  </li>
-                ))}
+                {layout_items
+                  .filter((item) => item.role_user.includes(userData.role))
+                  .map((item, index) => (
+                    <li key={index}>
+                      <Link
+                        className={`hover:text-[#493D9E] hover:font-bold ${
+                          item.link_active.some((l) =>
+                            l === "/" ? pathname === l : pathname.startsWith(l)
+                          )
+                            ? "text-[#493D9E] font-bold"
+                            : ""
+                        }`}
+                        to={item.link}
+                      >
+                        {item.name}
+                      </Link>
+                    </li>
+                  ))}
               </ul>
             </div>
           )}
@@ -301,23 +348,25 @@ export default function LayoutUser({
           />
         </div>
         <ul className="flex flex-col gap-4 p-4 font-semibold">
-          {layout_items.map((item, index) => (
-            <li key={index}>
-              <Link
-                className={`block hover:text-[#493D9E] hover:font-bold ${
-                  item.link_active.some((l) =>
-                    l === "/" ? pathname === l : pathname.startsWith(l)
-                  )
-                    ? "text-[#493D9E] font-bold"
-                    : ""
-                }`}
-                to={item.link}
-                onClick={() => setIsOpenDrawer(false)}
-              >
-                {item.name}
-              </Link>
-            </li>
-          ))}
+          {layout_items
+            .filter((item) => item.role_user.includes(userData.role))
+            .map((item, index) => (
+              <li key={index}>
+                <Link
+                  className={`block hover:text-[#493D9E] hover:font-bold ${
+                    item.link_active.some((l) =>
+                      l === "/" ? pathname === l : pathname.startsWith(l)
+                    )
+                      ? "text-[#493D9E] font-bold"
+                      : ""
+                  }`}
+                  to={item.link}
+                  onClick={() => setIsOpenDrawer(false)}
+                >
+                  {item.name}
+                </Link>
+              </li>
+            ))}
         </ul>
       </div>
       {isOpenDrawer && (
