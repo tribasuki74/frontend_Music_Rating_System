@@ -12,12 +12,16 @@ import { formatDuration } from "../../utils/format_duration";
 import { TO_PLAY_MUSIC } from "../../utils/paths";
 import { usePlayer } from "../../context/player";
 import { truncateText } from "../../utils/truncate_text";
+import useAuthUser from "react-auth-kit/hooks/useAuthUser";
 
 export default function UserProfilePage() {
   const { user_uuid } = useParams<{ user_uuid: string }>();
+  const authUser = useAuthUser() as { uuid: string } | null;
+  const user_uuid_login = authUser ? authUser.uuid : null;
   const navigate = useNavigate();
   const { playTrack } = usePlayer();
   const [loadingPage, setLoadingPage] = useState(true);
+  const [loadingReport, setLoadingReport] = useState(false);
   const [genreData, setGenreData] = useState<genreType[]>([]);
   const [userGenre, setUserGenre] = useState<string[]>([]);
   const [userMusic, setUserMusic] = useState<masterDataType[]>([]);
@@ -95,6 +99,66 @@ export default function UserProfilePage() {
     })();
   }, [user_uuid]);
 
+  async function handleReport() {
+    if (!user_uuid || !user_uuid_login) return;
+    setLoadingReport(true);
+    try {
+      const confirmReport = await Swal.fire({
+        icon: "warning",
+        title: "Are you sure?",
+        text: "You will report this user",
+        showCancelButton: true,
+        confirmButtonText: "Yes, report",
+        cancelButtonText: "Cancel",
+        allowOutsideClick: false,
+        didOpen: () => {
+          const container = document.querySelector(
+            ".swal2-container"
+          ) as HTMLElement;
+          if (container)
+            container.style.zIndex = "99999999999999999999999999999999";
+        },
+      });
+      if (!confirmReport.isConfirmed) {
+        setLoadingReport(false);
+        return;
+      }
+      await AXIOS_INSTANCE.post(`/user_report`, {
+        reported_user_uuid: user_uuid,
+      });
+      Swal.fire({
+        icon: "success",
+        title: "Success",
+        text: "Success to report user",
+        allowOutsideClick: false,
+        didOpen: () => {
+          const container = document.querySelector(
+            ".swal2-container"
+          ) as HTMLElement;
+          if (container)
+            container.style.zIndex = "99999999999999999999999999999999";
+        },
+      });
+    } catch (error) {
+      console.log(error);
+      Swal.fire({
+        icon: "error",
+        title: "Failed",
+        text: "Failed to report user",
+        allowOutsideClick: false,
+        didOpen: () => {
+          const container = document.querySelector(
+            ".swal2-container"
+          ) as HTMLElement;
+          if (container)
+            container.style.zIndex = "99999999999999999999999999999999";
+        },
+      });
+    } finally {
+      setLoadingReport(false);
+    }
+  }
+
   return loadingPage ? (
     <LoadingSpinner />
   ) : (
@@ -125,6 +189,21 @@ export default function UserProfilePage() {
               </p>
               <p>{userData.email}</p>
             </div>
+          </div>
+
+          <div className="flex items-center justify-center gap-2">
+            {user_uuid !== user_uuid_login && (
+              <button
+                onClick={handleReport}
+                className="px-4 py-2 font-medium text-white bg-red-500 rounded-lg"
+              >
+                {loadingReport ? (
+                  <LoadingSpinner fullScreen={false} width="20" />
+                ) : (
+                  "Report"
+                )}
+              </button>
+            )}
           </div>
         </div>
 
