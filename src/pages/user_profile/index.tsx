@@ -111,7 +111,7 @@ export default function UserProfilePage() {
   }, [user_uuid]);
 
   async function handleReport() {
-    if (!user_uuid || !user_uuid_login || isReported) return;
+    if (!user_uuid || isReported) return;
     setLoadingReport(true);
     try {
       const confirmReport = await Swal.fire({

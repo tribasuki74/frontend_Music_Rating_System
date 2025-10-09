@@ -39,6 +39,8 @@ import { formatTime } from "../utils/format_time";
 import { truncateText } from "../utils/truncate_text";
 import { GoKebabHorizontal } from "react-icons/go";
 import type { userType } from "../types/user";
+import Swal from "sweetalert2";
+import AXIOS_INSTANCE from "../utils/axios_instance";
 
 export default function LayoutUser({
   children,
@@ -51,6 +53,8 @@ export default function LayoutUser({
 }) {
   const { pathname } = useLocation();
   const [loading, setLoading] = useState(true);
+  const [loadingReport, setLoadingReport] = useState(false);
+  const [isReported, setIsReported] = useState(false);
   const [isOpenDrawer, setIsOpenDrawer] = useState(false);
   const [isOpenMenuDropdown, setIsOpenMenuDropdown] = useState(false);
   const isAuthenticated = useIsAuthenticated();
@@ -77,6 +81,66 @@ export default function LayoutUser({
     currentTrack?.user_rating,
     currentTrack?.ai_rating_result,
   ]);
+
+  async function handleReportMusic() {
+    if (isReported || !currentTrack?.uuid) return;
+    setLoadingReport(true);
+    try {
+      const confirmReport = await Swal.fire({
+        icon: "warning",
+        title: "Are you sure?",
+        text: "You will report this music",
+        showCancelButton: true,
+        confirmButtonText: "Yes, report",
+        cancelButtonText: "Cancel",
+        allowOutsideClick: false,
+        didOpen: () => {
+          const container = document.querySelector(
+            ".swal2-container"
+          ) as HTMLElement;
+          if (container)
+            container.style.zIndex = "99999999999999999999999999999999";
+        },
+      });
+      if (!confirmReport.isConfirmed) {
+        setLoadingReport(false);
+        return;
+      }
+      await AXIOS_INSTANCE.post(`/music_report`, {
+        reported_music_uuid: currentTrack?.uuid,
+      });
+      Swal.fire({
+        icon: "success",
+        title: "Success",
+        text: "Success to report music",
+        allowOutsideClick: false,
+        didOpen: () => {
+          const container = document.querySelector(
+            ".swal2-container"
+          ) as HTMLElement;
+          if (container)
+            container.style.zIndex = "99999999999999999999999999999999";
+        },
+      });
+    } catch (error) {
+      console.log(error);
+      Swal.fire({
+        icon: "error",
+        title: "Failed",
+        text: "Failed to report music",
+        allowOutsideClick: false,
+        didOpen: () => {
+          const container = document.querySelector(
+            ".swal2-container"
+          ) as HTMLElement;
+          if (container)
+            container.style.zIndex = "99999999999999999999999999999999";
+        },
+      });
+    } finally {
+      setLoadingReport(false);
+    }
+  }
 
   const layout_items = [
     {
@@ -299,6 +363,24 @@ export default function LayoutUser({
               >
                 Add to playlist
               </Link>
+
+              <button
+                onClick={handleReportMusic}
+                disabled={isReported}
+                className={`text-start ${
+                  isReported
+                    ? "text-gray-400 cursor-not-allowed"
+                    : "hover:text-[#493D9E]"
+                }`}
+              >
+                {loadingReport ? (
+                  <LoadingSpinner fullScreen={false} width="20" />
+                ) : isReported ? (
+                  "Reported"
+                ) : (
+                  "Report"
+                )}
+              </button>
             </DropdownMenu>
           </div>
         </div>
@@ -375,7 +457,7 @@ function DropdownMenu({
   return (
     <div
       ref={menuRef}
-      className={`absolute right-0 -top-24 flex flex-col gap-2 border p-4 space-y-2 font-medium text-black bg-white rounded-lg shadow-md transform transition-all duration-300 origin-top-right ${
+      className={`absolute right-0 -top-32 flex flex-col gap-2 border p-4 space-y-2 font-medium text-black bg-white rounded-lg shadow-md transform transition-all duration-300 origin-top-right ${
         isOpen
           ? "opacity-100 scale-100"
           : "opacity-0 scale-95 pointer-events-none"
