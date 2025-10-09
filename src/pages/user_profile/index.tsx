@@ -22,6 +22,7 @@ export default function UserProfilePage() {
   const { playTrack } = usePlayer();
   const [loadingPage, setLoadingPage] = useState(true);
   const [loadingReport, setLoadingReport] = useState(false);
+  const [isReported, setIsReported] = useState(false);
   const [genreData, setGenreData] = useState<genreType[]>([]);
   const [userGenre, setUserGenre] = useState<string[]>([]);
   const [userMusic, setUserMusic] = useState<masterDataType[]>([]);
@@ -78,6 +79,16 @@ export default function UserProfilePage() {
           }
         );
         setUserMusic(resUserMusic.data);
+
+        const { data: resIsReported } = await AXIOS_INSTANCE.get(
+          `/user_report/is_reported`,
+          {
+            params: {
+              reported_user_uuid: user_uuid,
+            },
+          }
+        );
+        setIsReported(resIsReported.is_reported);
       } catch (error) {
         console.log(error);
         Swal.fire({
@@ -100,7 +111,7 @@ export default function UserProfilePage() {
   }, [user_uuid]);
 
   async function handleReport() {
-    if (!user_uuid || !user_uuid_login) return;
+    if (!user_uuid || !user_uuid_login || isReported) return;
     setLoadingReport(true);
     try {
       const confirmReport = await Swal.fire({
@@ -195,10 +206,15 @@ export default function UserProfilePage() {
             {user_uuid !== user_uuid_login && (
               <button
                 onClick={handleReport}
-                className="px-4 py-2 font-medium text-white bg-red-500 rounded-lg"
+                className={`px-4 py-2 font-medium text-white rounded-lg ${
+                  isReported ? "bg-gray-400 cursor-not-allowed" : "bg-red-500"
+                }`}
+                disabled={isReported}
               >
                 {loadingReport ? (
                   <LoadingSpinner fullScreen={false} width="20" />
+                ) : isReported ? (
+                  "Reported"
                 ) : (
                   "Report"
                 )}

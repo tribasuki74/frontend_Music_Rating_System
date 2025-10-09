@@ -1,10 +1,10 @@
 import { jwtDecode } from "jwt-decode";
 
-// export const BACKEND_FASTAPI = "http://localhost:8000/api";
-export const BACKEND_FASTAPI = "https://api-music.amanahnurehsan.org/api";
+export const BACKEND_FASTAPI = "http://localhost:8000/api";
+// export const BACKEND_FASTAPI = "https://api-music.amanahnurehsan.org/api";
 
-// export const STORAGE_S3 = "https://s3.amanahnurehsan.org/music/uploads";
 export const STORAGE_S3 = "http://localhost:9000/music/uploads";
+// export const STORAGE_S3 = "https://s3.amanahnurehsan.org/music/uploads";
 
 export const GOOGLE_CLIENT_ID =
   "552402935047-3h6dfnii56q937osahunarcb8bidfkth.apps.googleusercontent.com";
