@@ -344,7 +344,11 @@ export default function LayoutUser({
             <GoKebabHorizontal
               size={28}
               className="cursor-pointer"
-              onClick={() => setIsOpenMenuDropdown(!isOpenMenuDropdown)}
+              onClick={() => {
+                if (currentTrack) {
+                  setIsOpenMenuDropdown(!isOpenMenuDropdown);
+                }
+              }}
             />
 
             <DropdownMenu
