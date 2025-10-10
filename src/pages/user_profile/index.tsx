@@ -137,6 +137,15 @@ export default function UserProfilePage() {
       await AXIOS_INSTANCE.post(`/user_report`, {
         reported_user_uuid: user_uuid,
       });
+      const { data: resIsReported } = await AXIOS_INSTANCE.get(
+        `/user_report/is_reported`,
+        {
+          params: {
+            reported_user_uuid: user_uuid,
+          },
+        }
+      );
+      setIsReported(resIsReported.is_reported);
       Swal.fire({
         icon: "success",
         title: "Success",
