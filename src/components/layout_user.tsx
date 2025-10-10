@@ -71,15 +71,29 @@ export default function LayoutUser({
   const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
 
   useEffect(() => {
-    if (isAuthenticated) {
-      setLoading(false);
-    } else {
-      window.location.href = TO_DASHBOARD_GUEST;
-    }
+    (async () => {
+      if (isAuthenticated) {
+        setLoading(false);
+        if (currentTrack?.uuid) {
+          const { data: resIsReported } = await AXIOS_INSTANCE.get(
+            `/user_upload_report/is_reported`,
+            {
+              params: {
+                user_upload_uuid: currentTrack.uuid,
+              },
+            }
+          );
+          setIsReported(resIsReported.is_reported);
+        }
+      } else {
+        window.location.href = TO_DASHBOARD_GUEST;
+      }
+    })();
   }, [
     isAuthenticated,
     currentTrack?.user_rating,
     currentTrack?.ai_rating_result,
+    currentTrack?.uuid,
   ]);
 
   async function handleReportMusic() {
@@ -106,9 +120,10 @@ export default function LayoutUser({
         setLoadingReport(false);
         return;
       }
-      await AXIOS_INSTANCE.post(`/music_report`, {
-        reported_music_uuid: currentTrack?.uuid,
+      await AXIOS_INSTANCE.post(`/user_upload_report`, {
+        user_upload_uuid: currentTrack?.uuid,
       });
+      setIsReported(true);
       Swal.fire({
         icon: "success",
         title: "Success",

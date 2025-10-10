@@ -157,7 +157,7 @@ export default function UserManagementPage() {
                       </td>
                       <td className="pr-2 text-nowrap">{item.email}</td>
                       <td className="pr-2 text-center text-nowrap">
-                        {index + 2}
+                        {item.report_count}
                       </td>
                       <td className="pr-2 text-center text-nowrap">
                         {item.is_active ? "Active" : "Suspend"}
