@@ -26,6 +26,20 @@ export default function UserProfilePage() {
   const [genreData, setGenreData] = useState<genreType[]>([]);
   const [userGenre, setUserGenre] = useState<string[]>([]);
   const [userMusic, setUserMusic] = useState<masterDataType[]>([]);
+  const [userDataLogin, setUserDataLogin] = useState<userType>({
+    profile_picture: undefined,
+    background_color: "",
+    first_name: "",
+    last_name: "",
+    email: "",
+    username: "",
+    date_birth: "",
+    uuid: "",
+    role: "",
+    is_active: true,
+    report_count: 0,
+    user_genres: [],
+  });
   const [userData, setUserData] = useState<userType>({
     profile_picture: undefined,
     background_color: "",
@@ -37,12 +51,13 @@ export default function UserProfilePage() {
     uuid: "",
     role: "",
     is_active: true,
+    report_count: 0,
     user_genres: [],
   });
 
   useEffect(() => {
     (async () => {
-      if (!user_uuid) {
+      if (!user_uuid || !user_uuid_login) {
         setLoadingPage(false);
         return;
       }
@@ -67,6 +82,14 @@ export default function UserProfilePage() {
             (genre: { genre_uuid: string }) => genre.genre_uuid
           )
         );
+
+        const { data: resUserLogin } = await AXIOS_INSTANCE.get(`/user`, {
+          params: {
+            uuid: user_uuid_login,
+          },
+        });
+        const userDataLogin = resUserLogin.data[0];
+        setUserDataLogin(userDataLogin);
 
         const { data: resUserMusic } = await AXIOS_INSTANCE.get(
           `/user_upload/get_by_user_uuid_is_public`,
@@ -108,7 +131,7 @@ export default function UserProfilePage() {
         setLoadingPage(false);
       }
     })();
-  }, [user_uuid]);
+  }, [user_uuid, user_uuid_login]);
 
   async function handleReport() {
     if (!user_uuid || isReported) return;
@@ -174,7 +197,7 @@ export default function UserProfilePage() {
   return loadingPage ? (
     <LoadingSpinner />
   ) : (
-    <LayoutUser userData={userData!}>
+    <LayoutUser userData={userDataLogin!}>
       <p className="my-2 font-bold">User Profile</p>
       <div className="px-8 py-6 bg-white rounded-lg shadow-md">
         <div className="flex items-center justify-between">
