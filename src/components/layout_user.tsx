@@ -14,6 +14,7 @@ import {
   TO_DASHBOARD_GUEST,
   TO_DASHBOARD_MAIN,
   TO_EXPLORE_SEARCH,
+  TO_MUSIC_REPORT,
   TO_MY_MUSIC,
   TO_MY_PLAYLIST,
   TO_PLAY_MUSIC,
@@ -210,6 +211,12 @@ export default function LayoutUser({
       name: "User Management",
       link: TO_USER_MANAGEMENT,
       link_active: [TO_USER_MANAGEMENT],
+      role_user: [ROLE_ADMINISTRATOR, ROLE_SUPER_ADMINISTRATOR],
+    },
+    {
+      name: "Music Report",
+      link: TO_MUSIC_REPORT,
+      link_active: [TO_MUSIC_REPORT],
       role_user: [ROLE_ADMINISTRATOR, ROLE_SUPER_ADMINISTRATOR],
     },
     {

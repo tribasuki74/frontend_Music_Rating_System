@@ -6,6 +6,7 @@ import {
   TO_DASHBOARD_MAIN,
   TO_EXPLORE_SEARCH,
   TO_LOGIN,
+  TO_MUSIC_REPORT,
   TO_MY_MUSIC,
   TO_MY_PLAYLIST,
   TO_MY_PLAYLIST_DETAIL,
@@ -49,6 +50,7 @@ import PublicPlaylistPage from "../pages/public_playlist";
 import PublicPlaylistDetailPage from "../pages/public_playlist_detail";
 import UserProfilePage from "../pages/user_profile";
 import UserManagementPage from "../pages/user_management";
+import MusicReportPage from "../pages/music_report";
 
 export const ROUTER = createBrowserRouter([
   {
@@ -122,6 +124,10 @@ export const ROUTER = createBrowserRouter([
   {
     path: TO_USER_MANAGEMENT,
     element: <UserManagementPage />,
+  },
+  {
+    path: TO_MUSIC_REPORT,
+    element: <MusicReportPage />,
   },
   {
     path: TO_PUBLIC_PLAYLIST,

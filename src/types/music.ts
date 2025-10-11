@@ -11,6 +11,7 @@ export type masterDataType = {
   background_status: string;
   background_log: string;
   background_color: string;
+  is_active: boolean;
   user_ratings: userRating[];
   user: userType;
 };
