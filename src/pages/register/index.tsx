@@ -108,6 +108,20 @@ export default function RegisterPage() {
             localStorage.setItem(REFRESH_TOKEN_NAME, resLogin.refresh_token);
             window.location.href = TO_DASHBOARD_MAIN;
           }
+        } else if (!resLogin.status) {
+          Swal.fire({
+            icon: "warning",
+            title: "Failed",
+            text: resLogin.detail,
+            allowOutsideClick: false,
+            didOpen: () => {
+              const container = document.querySelector(
+                ".swal2-container"
+              ) as HTMLElement;
+              if (container)
+                container.style.zIndex = "99999999999999999999999999999999";
+            },
+          });
         } else {
           window.location.href = `${TO_PROFILE_FORM}/${resLogin.email}/${formIsAgreeTerms}/google`;
         }
