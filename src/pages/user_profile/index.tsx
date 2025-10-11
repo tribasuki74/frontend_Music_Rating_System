@@ -39,6 +39,7 @@ export default function UserProfilePage() {
     is_active: true,
     report_count: 0,
     user_genres: [],
+    gender: "",
   });
   const [userData, setUserData] = useState<userType>({
     profile_picture: undefined,
@@ -53,6 +54,7 @@ export default function UserProfilePage() {
     is_active: true,
     report_count: 0,
     user_genres: [],
+    gender: "",
   });
 
   useEffect(() => {
@@ -287,14 +289,24 @@ export default function UserProfilePage() {
               />
             </div>
           </div>
-          <div className="flex flex-col w-full gap-1">
-            <label className="font-medium">Date of Birth</label>
-            <input
-              className="p-1 border border-gray-300 rounded-md"
-              type="date"
-              value={userData.date_birth}
-              disabled
-            />
+          <div className="flex items-center justify-center w-full gap-4 lg:gap-10">
+            <div className="flex flex-col w-full gap-1">
+              <label className="font-medium">Date of Birth</label>
+              <input
+                className="p-1 border border-gray-300 rounded-md"
+                type="date"
+                value={userData.date_birth}
+                disabled
+              />
+            </div>
+            <div className="flex flex-col w-full gap-1">
+              <label className="font-medium">Gender</label>
+              <input
+                className="p-1 border border-gray-300 rounded-md"
+                value={userData.gender}
+                disabled
+              />
+            </div>
           </div>
         </div>
 

@@ -3,6 +3,7 @@ export const TO_PROFILE_FORM = "/profile_form";
 export const TO_LOGIN = "/login";
 export const TO_OTP = "/otp";
 export const TO_DASHBOARD_MAIN = "/";
+export const TO_DASHBOARD_ADMIN = "/dashboard_admin";
 export const TO_DASHBOARD_GUEST = "/guest";
 export const TO_EXPLORE_SEARCH = "/explore_search";
 export const TO_TRENDING = "/trending";

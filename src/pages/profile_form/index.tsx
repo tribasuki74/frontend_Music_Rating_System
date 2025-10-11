@@ -31,6 +31,7 @@ export default function ProfileFormPage() {
     null
   );
   const [formDateBirth, setFormDateBirth] = useState<string | null>(null);
+  const [formGender, setFormGender] = useState<string | null>(null);
   const [formGenres, setFormGenres] = useState<string[]>([]);
   const [genreData, setGenreData] = useState<{ name: string; uuid: string }[]>(
     []
@@ -85,6 +86,7 @@ export default function ProfileFormPage() {
       !formLastName ||
       !formPassword ||
       !formDateBirth ||
+      !formGender ||
       formGenres.length === 0
     ) {
       Swal.fire({
@@ -111,6 +113,7 @@ export default function ProfileFormPage() {
         username: formUsername,
         password: formPassword,
         confirm_password: formConfirmPassword,
+        gender: formGender,
         email,
         role: "User",
         is_agree_terms: terms === "true" ? true : false,
@@ -315,6 +318,20 @@ export default function ProfileFormPage() {
                 placeholder="Date of Birth"
                 required
               />
+            </div>
+
+            <div className="flex flex-col w-full gap-1 mb-3">
+              <label className="block mb-1 text-sm font-medium text-gray-900 cursor-pointer">
+                Gender
+              </label>
+              <select
+                className="w-full p-1 border border-gray-300 rounded-md"
+                onChange={(e) => setFormGender(e.target.value)}
+                value={formGender ?? ""}
+              >
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+              </select>
             </div>
 
             <div className="mb-4">

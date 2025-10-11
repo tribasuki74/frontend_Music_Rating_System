@@ -11,6 +11,7 @@ export type userType = {
   background_color: string;
   role: string;
   profile_picture?: string;
+  gender: string;
   user_genres: genreType[];
   report_count: number;
 };

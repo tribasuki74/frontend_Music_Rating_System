@@ -11,6 +11,7 @@ import { Link, useLocation } from "react-router-dom";
 import {
   TO_ABOUT,
   TO_ACCOUNT,
+  TO_DASHBOARD_ADMIN,
   TO_DASHBOARD_GUEST,
   TO_DASHBOARD_MAIN,
   TO_EXPLORE_SEARCH,
@@ -159,6 +160,12 @@ export default function LayoutUser({
   }
 
   const layout_items = [
+    {
+      name: "Dashboard",
+      link: TO_DASHBOARD_ADMIN,
+      link_active: [TO_DASHBOARD_ADMIN],
+      role_user: [ROLE_ADMINISTRATOR, ROLE_SUPER_ADMINISTRATOR],
+    },
     {
       name: "Recommendation",
       link: TO_DASHBOARD_MAIN,

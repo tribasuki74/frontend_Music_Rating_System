@@ -2,6 +2,7 @@ import { createBrowserRouter } from "react-router-dom";
 import {
   TO_ABOUT,
   TO_ACCOUNT,
+  TO_DASHBOARD_ADMIN,
   TO_DASHBOARD_GUEST,
   TO_DASHBOARD_MAIN,
   TO_EXPLORE_SEARCH,
@@ -51,6 +52,7 @@ import PublicPlaylistDetailPage from "../pages/public_playlist_detail";
 import UserProfilePage from "../pages/user_profile";
 import UserManagementPage from "../pages/user_management";
 import MusicReportPage from "../pages/music_report";
+import DashboardAdminPage from "../pages/dashboard_admin";
 
 export const ROUTER = createBrowserRouter([
   {
@@ -60,6 +62,10 @@ export const ROUTER = createBrowserRouter([
   {
     path: TO_DASHBOARD_GUEST,
     element: <DashboardGuestPage />,
+  },
+  {
+    path: TO_DASHBOARD_ADMIN,
+    element: <DashboardAdminPage />,
   },
   {
     path: TO_REGISTER,

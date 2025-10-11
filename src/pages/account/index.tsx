@@ -41,6 +41,7 @@ export default function AccountPage() {
   const [formUsername, setFormUsername] = useState<string | null>(null);
   const [formEmail, setFormEmail] = useState<string | null>(null);
   const [formDateOfBirth, setFormDateOfBirth] = useState<string | null>(null);
+  const [formGender, setFormGender] = useState<string | null>(null);
   const [isActive, setIsActive] = useState<boolean>(true);
   const [ppFile, setPpFile] = useState<File | null>(null);
   const [ppFilename, setPpFilename] = useState<string | null>(null);
@@ -502,6 +503,21 @@ export default function AccountPage() {
               value={formDateOfBirth ?? ""}
               disabled={!isEdit}
             />
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-4 mt-4 lg:mt-6 lg:flex-row lg:gap-10">
+          <div className="flex flex-col w-full gap-1">
+            <label className="font-medium">Gender</label>
+            <select
+              className="w-full p-1 border border-gray-300 rounded-md"
+              onChange={(e) => setFormGender(e.target.value)}
+              value={formGender ?? ""}
+              disabled={!isEdit}
+            >
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+            </select>
           </div>
         </div>
 
